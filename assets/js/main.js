@@ -5,9 +5,15 @@
     const sections = document.querySelectorAll('section[id]');
     let isTicking = false;
 
-    const updateUserInterface = () => {
+    /**
+     * Updates UI elements based on scroll position.
+     * - Adds/removes 'scroll-header' class.
+     * - Highlights the active navigation link.
+     */
+    const updateUserInterfaceOnScroll = () => {
         const scrollY = window.pageYOffset;
 
+        // Handle header background
         if (header) {
             if (scrollY >= 50) {
                 header.classList.add('scroll-header');
@@ -16,9 +22,10 @@
             }
         }
 
+        // Handle active nav link
         sections.forEach(current => {
             const sectionHeight = current.offsetHeight;
-            const sectionTop = current.offsetTop - 58;
+            const sectionTop = current.offsetTop - 58; // Offset for header height
             const sectionId = current.getAttribute('id');
             const navLink = document.querySelector(`.nav__menu a[href*=${sectionId}]`);
 
@@ -33,13 +40,19 @@
         isTicking = false;
     };
 
+    /**
+     * Efficiently handles scroll events using requestAnimationFrame.
+     */
     const onScroll = () => {
         if (!isTicking) {
-            window.requestAnimationFrame(updateUserInterface);
+            window.requestAnimationFrame(updateUserInterfaceOnScroll);
             isTicking = true;
         }
     };
 
+    /**
+     * Initializes the MixItUp filter for the systems section.
+     */
     const initializeSystemFilter = () => {
         const container = document.querySelector('.systems__container');
         if (!container || typeof mixitup === 'undefined') return;
@@ -50,8 +63,7 @@
             },
             animation: {
                 duration: 350,
-                effects: 'fade',
-                applyPerspective: false
+                effects: 'fade scale(0.95)'
             }
         });
 
@@ -64,6 +76,9 @@
         });
     };
 
+    /**
+     * Initializes the modal functionality for system details.
+     */
     const initializeModals = () => {
         const modalViews = document.querySelectorAll('.details__modal');
         const modalBtns = document.querySelectorAll('.system__details-button');
@@ -86,33 +101,42 @@
         };
 
         modalCloses.forEach(mc => mc.addEventListener('click', closeModal));
-        modalViews.forEach(mv => mv.addEventListener('click', e => e.target === mv && closeModal()));
-        document.addEventListener('keydown', e => e.key === 'Escape' && closeModal());
+        modalViews.forEach(mv => mv.addEventListener('click', e => {
+            if (e.target === mv) closeModal();
+        }));
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
     };
 
+    /**
+     * Initializes ScrollReveal animations.
+     */
     const initializeScrollReveal = () => {
         if (typeof ScrollReveal === 'undefined') return;
 
         const sr = ScrollReveal({
             origin: 'bottom',
-            distance: '50px',
-            duration: 800,
+            distance: '60px',
+            duration: 900,
             delay: 200,
             reset: false,
             easing: 'cubic-bezier(0.5, 0, 0, 1)',
-            viewFactor: 0.3
+            viewFactor: 0.2
         });
 
         sr.reveal('.hero__data');
-        sr.reveal('.feature__item', { interval: 150 });
+        sr.reveal('.feature__item', { interval: 200 });
         sr.reveal('.systems__filters', { delay: 300 });
-        sr.reveal('.system__card', { interval: 100 });
+        sr.reveal('.system__card', { interval: 150 });
         sr.reveal('.contact__container');
     };
 
+    /**
+     * Main function to run when the DOM is ready.
+     */
     document.addEventListener('DOMContentLoaded', () => {
-        updateUserInterface();
-        
+        updateUserInterfaceOnScroll();
         initializeSystemFilter();
         initializeModals();
         initializeScrollReveal();

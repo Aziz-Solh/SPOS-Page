@@ -1,147 +1,147 @@
-(function() {
-    'use strict';
+const starContainer = document.getElementById('star-field');
+if (starContainer) {
+    for (let i = 0; i < 150; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 4 + 's';
+        star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        starContainer.appendChild(star);
+    }
+}
 
-    const header = document.getElementById('header');
-    const sections = document.querySelectorAll('section[id]');
-    let isTicking = false;
+// خرائط مسارات الصور (تمت استعادة المسارات المحلية الأصلية)
+const laptopScreens = {
+    dashboard: "assets/img/dashboard.png",
+    pos: "assets/img/pos.png",
+    debts: "assets/img/debts.png"
+};
 
-    /**
-     * Updates UI elements based on scroll position.
-     * - Adds/removes 'scroll-header' class.
-     * - Highlights the active navigation link.
-     */
-    const updateUserInterfaceOnScroll = () => {
-        const scrollY = window.pageYOffset;
+const phoneScreens = {
+    monitor: "assets/img/mobile-monitor.png",
+    inventory: "assets/img/mobile-inventory.png",
+    debts: "assets/img/mobile-debts.png"
+};
 
-        // Handle header background
-        if (header) {
-            if (scrollY >= 50) {
-                header.classList.add('scroll-header');
-            } else {
-                header.classList.remove('scroll-header');
-            }
+// وظيفة تبديل التبويبات وتحديث صور الأجهزة
+function setActiveTab(button) {
+    // إزالة التفعيل من جميع الأزرار
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    // تفعيل الزر الحالي
+    button.classList.add('active');
+    
+    const laptopScreenName = button.getAttribute('data-laptop');
+    const phoneScreenName = button.getAttribute('data-phone');
+    
+    const laptopImgElement = document.getElementById('laptop-img');
+    const phoneImgElement = document.getElementById('phone-img');
+
+    // تحديث صور اللابتوب مع التحقق وتأثير بسيط
+    if (laptopImgElement && laptopScreens[laptopScreenName]) {
+        laptopImgElement.style.opacity = 0;
+        setTimeout(() => { 
+            laptopImgElement.src = laptopScreens[laptopScreenName];
+            laptopImgElement.style.opacity = 1;
+        }, 100);
+    }
+
+    // تحديث صور الهاتف مع التحقق وتأثير بسيط
+    if (phoneImgElement && phoneScreens[phoneScreenName]) {
+        phoneImgElement.style.opacity = 0;
+        setTimeout(() => {
+            phoneImgElement.src = phoneScreens[phoneScreenName];
+            phoneImgElement.style.opacity = 1;
+        }, 100);
+    }
+}
+
+// تعيين التبويب الأول كنشط عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    const firstTab = document.querySelector('.tab-btn');
+    if (firstTab) {
+        setActiveTab(firstTab);
+    }
+});
+
+
+// منطق النافذة المنبثقة (Modal)
+const modal = document.getElementById('pricing-modal');
+const modalTitle = document.getElementById('modal-title');
+const systemTitles = {
+    'restaurant': 'تفاصيل باقات المطاعم والمقاهي',
+    'retail': 'تفاصيل باقات الملابس والتجزئة',
+    'pharmacy': 'تفاصيل باقات الصيدليات',
+    'grocery': 'تفاصيل باقات المواد الغذائية',
+    'construction': 'تفاصيل باقات المقاولات والكهرباء'
+};
+
+function openModal(systemType) {
+    if (modal && modalTitle && systemTitles[systemType]) {
+        modalTitle.innerText = systemTitles[systemType];
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // منع التمرير أثناء عرض المودال
+    }
+}
+
+function closeModal() {
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto'; // إعادة التمرير
+    }
+}
+
+// إغلاق المودال عند النقر على الخلفية
+if (modal) {
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
         }
+    });
+}
 
-        // Handle active nav link
-        sections.forEach(current => {
-            const sectionHeight = current.offsetHeight;
-            const sectionTop = current.offsetTop - 58; // Offset for header height
-            const sectionId = current.getAttribute('id');
-            const navLink = document.querySelector(`.nav__menu a[href*=${sectionId}]`);
+// إغلاق المودال باستخدام زر ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape" && modal && modal.classList.contains('active')) {
+        closeModal();
+    }
+});
 
-            if (navLink) {
-                if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-                    document.querySelectorAll('.nav__link').forEach(link => link.classList.remove('active-link'));
-                    navLink.classList.add('active-link');
-                }
+// منطق التكبير (Lightbox)
+document.addEventListener('DOMContentLoaded', () => {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const zoomableElements = document.querySelectorAll('.zoomable');
+    const closeBtn = document.querySelector('.lightbox-close');
+
+    zoomableElements.forEach(element => {
+        element.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // البحث عن عنصر الصورة داخل الإطار
+            const innerImg = this.querySelector('.laptop-img, .phone-img');
+            if (lightbox && innerImg) {
+                lightbox.style.display = 'flex';
+                lightboxImg.src = innerImg.src;
             }
         });
-
-        isTicking = false;
-    };
-
-    /**
-     * Efficiently handles scroll events using requestAnimationFrame.
-     */
-    const onScroll = () => {
-        if (!isTicking) {
-            window.requestAnimationFrame(updateUserInterfaceOnScroll);
-            isTicking = true;
-        }
-    };
-
-    /**
-     * Initializes the MixItUp filter for the systems section.
-     */
-    const initializeSystemFilter = () => {
-        const container = document.querySelector('.systems__container');
-        if (!container || typeof mixitup === 'undefined') return;
-
-        mixitup(container, {
-            selectors: {
-                target: '.system__card'
-            },
-            animation: {
-                duration: 350,
-                effects: 'fade scale(0.95)'
-            }
-        });
-
-        const filterItems = document.querySelectorAll('.systems__item');
-        filterItems.forEach(item => {
-            item.addEventListener('click', function() {
-                filterItems.forEach(el => el.classList.remove('active-filter'));
-                this.classList.add('active-filter');
-            });
-        });
-    };
-
-    /**
-     * Initializes the modal functionality for system details.
-     */
-    const initializeModals = () => {
-        const modalViews = document.querySelectorAll('.details__modal');
-        const modalBtns = document.querySelectorAll('.system__details-button');
-        const modalCloses = document.querySelectorAll('.details__modal-close');
-
-        if (modalViews.length === 0) return;
-
-        modalBtns.forEach((modalBtn, i) => {
-            modalBtn.addEventListener('click', () => {
-                if (modalViews[i]) {
-                    document.body.style.overflow = 'hidden';
-                    modalViews[i].classList.add('show-modal');
-                }
-            });
-        });
-
-        const closeModal = () => {
-            modalViews.forEach(modalView => modalView.classList.remove('show-modal'));
-            document.body.style.overflow = 'auto';
-        };
-
-        modalCloses.forEach(mc => mc.addEventListener('click', closeModal));
-        modalViews.forEach(mv => mv.addEventListener('click', e => {
-            if (e.target === mv) closeModal();
-        }));
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') closeModal();
-        });
-    };
-
-    /**
-     * Initializes ScrollReveal animations.
-     */
-    const initializeScrollReveal = () => {
-        if (typeof ScrollReveal === 'undefined') return;
-
-        const sr = ScrollReveal({
-            origin: 'bottom',
-            distance: '60px',
-            duration: 900,
-            delay: 200,
-            reset: false,
-            easing: 'cubic-bezier(0.5, 0, 0, 1)',
-            viewFactor: 0.2
-        });
-
-        sr.reveal('.hero__data');
-        sr.reveal('.feature__item', { interval: 200 });
-        sr.reveal('.systems__filters', { delay: 300 });
-        sr.reveal('.system__card', { interval: 150 });
-        sr.reveal('.contact__container');
-    };
-
-    /**
-     * Main function to run when the DOM is ready.
-     */
-    document.addEventListener('DOMContentLoaded', () => {
-        updateUserInterfaceOnScroll();
-        initializeSystemFilter();
-        initializeModals();
-        initializeScrollReveal();
-
-        window.addEventListener('scroll', onScroll, { passive: true });
     });
 
-})();
+    function closeLightbox() {
+        if (lightbox) {
+            lightbox.style.display = 'none';
+        }
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeLightbox);
+    }
+    
+    // إغلاق اللايت بوكس عند النقر على الخلفية
+    if (lightbox) {
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) { // تأكدنا من النقر على الخلفية وليس الصورة
+                closeLightbox();
+            }
+        });
+    }
+});

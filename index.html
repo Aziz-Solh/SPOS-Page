@@ -61,7 +61,14 @@
                     </div>
                 </div>
             </div>
-
+            <div class="device-toggle hidden-on-desktop mt-4">
+                <button id="show-laptop-btn" class="toggle-btn" onclick="showDevice('laptop', this)">
+                    <i class='bx bx-laptop'></i> عرض المنظومة (PC)
+                </button>
+                <button id="show-phone-btn" class="toggle-btn" onclick="showDevice('phone', this)">
+                    <i class='bx bx-mobile-alt'></i> عرض الهاتف
+                </button>
+            </div>
             <div class="device-wrapper">
                 <div class="laptop-frame zoomable">
                     <div class="laptop-screen">

@@ -62,6 +62,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (firstTab) {
         setActiveTab(firstTab);
     }
+    const showLaptopBtn = document.getElementById('show-laptop-btn');
+    const showPhoneBtn = document.getElementById('show-phone-btn');
+
+    if (window.innerWidth <= 767) {
+        // افتراضياً، عند الجوال نبدأ بعرض الهاتف
+        if (showPhoneBtn) {
+            showDevice('phone', showPhoneBtn);
+        }
+    } else {
+        // على الديسكتوب، تأكد من إظهار كلاهما وإخفاء أزرار التبديل
+        document.querySelector('.laptop-frame')?.classList.remove('frame-hidden');
+        document.querySelector('.phone-frame')?.classList.remove('frame-hidden');
+    }
 });
 
 
@@ -144,4 +157,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
+});function showDevice(deviceType, button) {
+    const laptopFrame = document.querySelector('.laptop-frame');
+    const phoneFrame = document.querySelector('.phone-frame');
+    const allToggleBtns = document.querySelectorAll('.toggle-btn');
+    
+    // إزالة التفعيل من جميع أزرار التبديل
+    allToggleBtns.forEach(btn => btn.classList.remove('active-toggle'));
+
+    if (deviceType === 'laptop') {
+        laptopFrame.classList.remove('frame-hidden');
+        phoneFrame.classList.add('frame-hidden');
+    } else {
+        phoneFrame.classList.remove('frame-hidden');
+        laptopFrame.classList.add('frame-hidden');
+    }
+    
+    // تفعيل الزر الذي تم النقر عليه
+    if (button) {
+        button.classList.add('active-toggle');
+    }
+}

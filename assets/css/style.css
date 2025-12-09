@@ -409,4 +409,61 @@ body {
         visibility: hidden;
         transform: translate(-50%, -50%) scale(0.8) !important;
     }
+}/* ------------------------------------ */
+/* WHATSAPP FLOAT BUTTON (النهائي المتناسق مع النبض) */
+/* ------------------------------------ */
+.whatsapp-float {
+    /* التموضع: يمين أسفل */
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 999;
+    
+    /* الإطار الزجاجي الأنيق */
+    width: 65px;
+    height: 65px;
+    background: rgba(255, 255, 255, 0.95); /* أكثر بياضاً لزيادة وضوح الزجاجية */
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+    
+    /* الأيقونة: نستخدم لون أساسي (أزرق) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 48px;
+    color: var(--color-core); 
+    
+    /* الظل والحركة (سنزيل الظل المبدئي ونعتمد على النبض لإظهاره) */
+    box-shadow: none; /* إزالة الظل الثابت ليعتمد على النبض */
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); /* تنعيم حركة الانتقال */
+    
+    /* تطبيق النبض (تأكد من أن هذا الكلاس يظهر آخر شيء في القواعد) */
+    animation: whatsapp-pulse 2s infinite ease-out;
+}
+
+/* تأثير التحويم (Hover - الاحترافية والوضوح الأخضر) */
+.whatsapp-float:hover {
+    /* إيقاف النبض */
+    animation: none; 
+    
+    /* تحول بسيط ومناسب للوضع الفاتح */
+    transform: translateY(-8px); 
+    
+    /* لون الأيقونة يصبح أخضر عند التحويم لتعزيز الهوية */
+    color: #25d366; 
+    
+    /* التوهج الأخضر (توهج خفيف لكن واضح) */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 0 5px rgba(37, 211, 102, 0.15); 
+    
+    /* تحويل حدود الزر لضوء أخضر */
+    border-color: rgba(37, 211, 102, 0.5); 
+}
+
+/* النبض: نستخدم التوهج الأزرق الخاص بك لكن بتوقيت أنعم */
+@keyframes whatsapp-pulse {
+    0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1), 0 0 0 0px rgba(59, 130, 246, 0.1); } /* ظل طبيعي وتوهج صفري */
+    50% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 0 10px rgba(59, 130, 246, 0.2); } /* ذروة النبض والظل والتوهج الأزرق */
+    100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1), 0 0 0 0px rgba(59, 130, 246, 0.1); } /* عودة للحالة الطبيعية */
 }

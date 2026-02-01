@@ -1,180 +1,215 @@
-const starContainer = document.getElementById('star-field');
-if (starContainer) {
-    for (let i = 0; i < 150; i++) {
-        const star = document.createElement('div');
-        star.className = 'star';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.animationDelay = Math.random() * 4 + 's';
-        star.style.animationDuration = (Math.random() * 2 + 2) + 's';
-        starContainer.appendChild(star);
+/**
+ * ملف JavaScript الرئيسي للموقع
+ *
+ * يحتوي على:
+ * - تحديث واجهة المستخدم عند التمرير
+ * - تصفية الأنظمة باستخدام MixItUp
+ * - إدارة النوافذ التفصيلية
+ * - تأثيرات ScrollReveal
+ */
+
+/* 
+    (function() { ... })():
+    Immediate Invoked Function Expression (IIFE)
+    وظيفة تُنفّذ فوراً لحماية المتغيرات من النطاق العام
+*/
+(function () {
+  "use strict";
+  /* 
+    'use strict': تفعيل وضع JavaScript الصارم
+    يساعد على تجنب الأخطاء الشائعة
+  */
+
+  // --- متغيرات عناصر DOM ---
+  const header = document.getElementById("header");
+  const sections = document.querySelectorAll("section[id]");
+
+  // --- متغير حالة لتحسين أداء التمرير ---
+  let isTicking = false;
+
+  /*
+    updateUserInterfaceOnScroll:
+    وظيفة لتحديث واجهة المستخدم عند التمرير
+  */
+  const updateUserInterfaceOnScroll = () => {
+    const scrollY = window.pageYOffset;
+
+    /* 
+        القسم الأول: تغيير خلفية الهيدر
+        يضيف فئة 'scroll-header' عند التمرير لأسفل
+    */
+    if (header) {
+      if (scrollY >= 50) {
+        header.classList.add("scroll-header");
+      } else {
+        header.classList.remove("scroll-header");
+      }
     }
-}
 
-// خرائط مسارات الصور (تمت استعادة المسارات المحلية الأصلية)
-const laptopScreens = {
-    dashboard: "assets/img/dashboard.png",
-    pos: "assets/img/pos.png",
-    debts: "assets/img/debts.png"
-};
+    /* 
+        القسم الثاني: تحديد رابط القائمة النشط
+        يتتبع القسم المعروض حاليًا ويضيف فئة 'active-link' للرابط المناسب
+    */
+    sections.forEach((current) => {
+      const sectionHeight = current.offsetHeight;
+      const sectionTop = current.offsetTop - 58;
+      const sectionId = current.getAttribute("id");
+      const navLink = document.querySelector(
+        `.nav__menu a[href*=${sectionId}]`
+      );
 
-const phoneScreens = {
-    monitor: "assets/img/mobile-monitor.png",
-    inventory: "assets/img/mobile-inventory.png",
-    debts: "assets/img/mobile-debts.png"
-};
-
-// وظيفة تبديل التبويبات وتحديث صور الأجهزة
-function setActiveTab(button) {
-    // إزالة التفعيل من جميع الأزرار
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    // تفعيل الزر الحالي
-    button.classList.add('active');
-    
-    const laptopScreenName = button.getAttribute('data-laptop');
-    const phoneScreenName = button.getAttribute('data-phone');
-    
-    const laptopImgElement = document.getElementById('laptop-img');
-    const phoneImgElement = document.getElementById('phone-img');
-
-    // تحديث صور اللابتوب مع التحقق وتأثير بسيط
-    if (laptopImgElement && laptopScreens[laptopScreenName]) {
-        laptopImgElement.style.opacity = 0;
-        setTimeout(() => { 
-            laptopImgElement.src = laptopScreens[laptopScreenName];
-            laptopImgElement.style.opacity = 1;
-        }, 100);
-    }
-
-    // تحديث صور الهاتف مع التحقق وتأثير بسيط
-    if (phoneImgElement && phoneScreens[phoneScreenName]) {
-        phoneImgElement.style.opacity = 0;
-        setTimeout(() => {
-            phoneImgElement.src = phoneScreens[phoneScreenName];
-            phoneImgElement.style.opacity = 1;
-        }, 100);
-    }
-}
-
-// تعيين التبويب الأول كنشط عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
-    const firstTab = document.querySelector('.tab-btn');
-    if (firstTab) {
-        setActiveTab(firstTab);
-    }
-    const showLaptopBtn = document.getElementById('show-laptop-btn');
-    const showPhoneBtn = document.getElementById('show-phone-btn');
-
-    if (window.innerWidth <= 767) {
-        // افتراضياً، عند الجوال نبدأ بعرض الهاتف
-        if (showPhoneBtn) {
-            showDevice('phone', showPhoneBtn);
+      if (navLink) {
+        if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+          document
+            .querySelectorAll(".nav__link")
+            .forEach((link) => link.classList.remove("active-link"));
+          navLink.classList.add("active-link");
         }
-    } else {
-        // على الديسكتوب، تأكد من إظهار كلاهما وإخفاء أزرار التبديل
-        document.querySelector('.laptop-frame')?.classList.remove('frame-hidden');
-        document.querySelector('.phone-frame')?.classList.remove('frame-hidden');
-    }
-});
-
-
-// منطق النافذة المنبثقة (Modal)
-const modal = document.getElementById('pricing-modal');
-const modalTitle = document.getElementById('modal-title');
-const systemTitles = {
-    'restaurant': 'تفاصيل باقات المطاعم والمقاهي',
-    'retail': 'تفاصيل باقات الملابس والتجزئة',
-    'pharmacy': 'تفاصيل باقات الصيدليات',
-    'grocery': 'تفاصيل باقات المواد الغذائية',
-    'construction': 'تفاصيل باقات المقاولات والكهرباء'
-};
-
-function openModal(systemType) {
-    if (modal && modalTitle && systemTitles[systemType]) {
-        modalTitle.innerText = systemTitles[systemType];
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden'; // منع التمرير أثناء عرض المودال
-    }
-}
-
-function closeModal() {
-    if (modal) {
-        modal.classList.remove('active');
-        document.body.style.overflow = 'auto'; // إعادة التمرير
-    }
-}
-
-// إغلاق المودال عند النقر على الخلفية
-if (modal) {
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-}
-
-// إغلاق المودال باستخدام زر ESC
-document.addEventListener('keydown', (e) => {
-    if (e.key === "Escape" && modal && modal.classList.contains('active')) {
-        closeModal();
-    }
-});
-
-// منطق التكبير (Lightbox)
-document.addEventListener('DOMContentLoaded', () => {
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const zoomableElements = document.querySelectorAll('.zoomable');
-    const closeBtn = document.querySelector('.lightbox-close');
-
-    zoomableElements.forEach(element => {
-        element.addEventListener('click', function(e) {
-            e.stopPropagation();
-            // البحث عن عنصر الصورة داخل الإطار
-            const innerImg = this.querySelector('.laptop-img, .phone-img');
-            if (lightbox && innerImg) {
-                lightbox.style.display = 'flex';
-                lightboxImg.src = innerImg.src;
-            }
-        });
+      }
     });
 
-    function closeLightbox() {
-        if (lightbox) {
-            lightbox.style.display = 'none';
+    isTicking = false;
+  };
+
+  /*
+    onScroll:
+    معالج حدث التمرير (scroll)
+    يستخدم requestAnimationFrame لضمان تنفيذ التحديثات بسلاسة
+  */
+  const onScroll = () => {
+    if (!isTicking) {
+      window.requestAnimationFrame(updateUserInterfaceOnScroll);
+      isTicking = true;
+    }
+  };
+
+  /*
+    initializeSystemFilter:
+    وظيفة تهيئة مكتبة MixItUp لفلترة بطاقات الأنظمة
+  */
+  const initializeSystemFilter = () => {
+    const container = document.querySelector(".systems__container");
+
+    /* 
+        التحقق من وجود الحاوية ومكتبة mixitup قبل التشغيل
+    */
+    if (!container || typeof mixitup === "undefined") return;
+
+    /* 
+        تهيئة MixItUp مع تحديد العناصر المستهدفة وتأثيرات الحركة
+    */
+    mixitup(container, {
+      selectors: {
+        target: ".system__card",
+      },
+      animation: {
+        duration: 400,
+        effects: "fade scale(0.9)",
+        easing: "ease-in-out",
+        queue: false, // يمنع تراكم الحركات إذا ضغط المستخدم بسرعة
+      },
+    });
+
+    /* 
+        إضافة حدث النقر لأزرار الفلترة لتغيير الفئة النشطة
+    */
+    const filterItems = document.querySelectorAll(".systems__item");
+    filterItems.forEach((item) => {
+      item.addEventListener("click", function () {
+        filterItems.forEach((el) => el.classList.remove("active-filter"));
+        this.classList.add("active-filter");
+      });
+    });
+  };
+
+  /*
+    initializeModals:
+    وظيفة تهيئة وظائف النوافذ المنبثقة (Modals)
+  */
+  const initializeModals = () => {
+    const modalViews = document.querySelectorAll(".details__modal");
+    const modalBtns = document.querySelectorAll(".system__details-button");
+    const modalCloses = document.querySelectorAll(".details__modal-close");
+
+    if (modalViews.length === 0) return;
+
+    /* 
+        وظيفة لفتح النافذة المناسبة عند النقر على زر "التفاصيل"
+    */
+    modalBtns.forEach((modalBtn, i) => {
+      modalBtn.addEventListener("click", () => {
+        if (modalViews[i]) {
+          document.body.style.overflow = "hidden"; /* منع تمرير الخلفية */
+          modalViews[i].classList.add("show-modal");
         }
-    }
+      });
+    });
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closeLightbox);
-    }
-    
-    // إغلاق اللايت بوكس عند النقر على الخلفية
-    if (lightbox) {
-        lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox) { // تأكدنا من النقر على الخلفية وليس الصورة
-                closeLightbox();
-            }
-        });
-    }
-});function showDevice(deviceType, button) {
-    const laptopFrame = document.querySelector('.laptop-frame');
-    const phoneFrame = document.querySelector('.phone-frame');
-    const allToggleBtns = document.querySelectorAll('.toggle-btn');
-    
-    // إزالة التفعيل من جميع أزرار التبديل
-    allToggleBtns.forEach(btn => btn.classList.remove('active-toggle'));
+    /* 
+        وظيفة مركزية لإغلاق النوافذ
+    */
+    const closeModal = () => {
+      modalViews.forEach((modalView) =>
+        modalView.classList.remove("show-modal")
+      );
+      document.body.style.overflow = "auto"; /* إعادة تفعيل تمرير الخلفية */
+    };
 
-    if (deviceType === 'laptop') {
-        laptopFrame.classList.remove('frame-hidden');
-        phoneFrame.classList.add('frame-hidden');
-    } else {
-        phoneFrame.classList.remove('frame-hidden');
-        laptopFrame.classList.add('frame-hidden');
-    }
-    
-    // تفعيل الزر الذي تم النقر عليه
-    if (button) {
-        button.classList.add('active-toggle');
-    }
-}
+    /* 
+        طرق إغلاق النافذة:
+        1. النقر على زر الإغلاق (X)
+    */
+    modalCloses.forEach((mc) => mc.addEventListener("click", closeModal));
+
+    /* 
+        2. النقر على خلفية النافذة
+    */
+    modalViews.forEach((mv) =>
+      mv.addEventListener("click", (e) => {
+        if (e.target === mv) closeModal();
+      })
+    );
+  };
+
+  /*
+    initializeScrollReveal:
+    وظيفة تهيئة مكتبة ScrollReveal لإضافة تأثيرات ظهور عند التمرير
+  */
+  const initializeScrollReveal = () => {
+    if (typeof ScrollReveal === "undefined") return;
+
+    const sr = ScrollReveal({
+      origin: "bottom", // تبدأ الحركة من الأسفل
+      distance: "60px", // يتحرك العنصر مسافة 60 بكسل
+      duration: 900, // تستغرق الحركة 0.9 ثانية
+      delay: 200, // تبدأ الحركة بعد 0.2 ثانية
+      reset: false, // تحدث الحركة مرة واحدة فقط
+      easing: "cubic-bezier(0.5, 0, 0, 1)", // منحنى سرعة ناعم (بطيء ثم سريع)
+      viewFactor: 0.2, // تبدأ الحركة عند ظهور 20% من العنصر
+    });
+
+    sr.reveal(".point__data");
+    sr.reveal(".feature__item", { interval: 200 });
+    sr.reveal(".systems__filters", { delay: 300 });
+    sr.reveal(".contact__container");
+  };
+  /*
+    نقطة البداية الرئيسية:
+    يتم استدعاء هذه الوظائف بعد تحميل محتوى الصفحة (DOM)
+  */
+  document.addEventListener("DOMContentLoaded", () => {
+    //مستمع حدث DOMContentLoaded لضمان وجود كل العناصر قبل تشغيل السكربت
+    /* 
+        تهيئة جميع الوظائف
+    */
+    updateUserInterfaceOnScroll();
+    initializeSystemFilter();
+    initializeModals();
+    initializeScrollReveal();
+
+    /* 
+        إضافة مستمع حدث التمرير للنافذة
+    */
+    window.addEventListener("scroll", onScroll, { passive: true });
+  });
+})();
